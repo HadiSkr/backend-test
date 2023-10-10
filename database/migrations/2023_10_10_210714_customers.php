@@ -23,12 +23,16 @@ return new class extends Migration
             $table->string('password');
             $table->string('bank_name');
             $table->integer('bank_number')->nullable();
-            $table->string('general_service'); #خدمة عامة
-            $table->string('specific_service'); #خدمة فرعية
             $table->string('image');
             $table->decimal('latitude', 10, 7)->nullable(); #من اجل الموقع
             $table->decimal('longitude', 10, 7)->nullable(); #من اجل الموقغ
             $table->timestamps();
+            $table->unsignedBigInteger('service_id')->nullable();
+            $table->unsignedBigInteger('specific_service_id')->nullable();
+            $table->foreign('service_id')->references('id')->on('services')->onDelete('cascade');
+            $table->foreign('specific_service_id')->references('id')->on('specific_services')->onDelete('cascade');
+
+
         });
     }
 

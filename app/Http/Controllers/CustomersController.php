@@ -10,46 +10,34 @@ use Illuminate\Support\Facades\Hash;
 class CustomersController extends Controller
 {
     public function customer_signup(Request $request)
-    {
+{
+    $validated = $request->validate([
+        'name' => 'required',
+        'city' => 'required',
+        'phone' => 'required|unique:customers',
+        'email' => 'required|email|unique:customers',
+        'password' => 'required|min:6',
+        'service_id' => 'required|exists:services,id',
+        'specific_service_id' => 'required|exists:specific_services,id',
+        'bank_name'=> 'required|string',
+        'bank_number'=> 'required|integer',
+        'image' => 'string',
+        'latitude' => 'nullable|numeric',
+        'longitude' => 'nullable|numeric',
+    ]);
 
-        $validated = $request->validate([
-            'name' => 'required',
-            'city' => 'required',
-            'phone' => 'required|unique:customers',
-            'email' => 'required|email|unique:customers',
-            'password' => 'required|min:6',
-            'general_service' => 'required',
-            'bank_name'=> 'required|string',
-            'bank_number'=> 'required|integer',
-            'specific_service' => 'required',
-            //'image' => 'image|mimes:jpeg,png,jpg|max:2048', // Example validation for image upload
-            'image' => 'string',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
-        ]);
-                 
-        // طريقة لرفع الصورة وتخزينها في الباك
-        /*if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('images'), $imageName);
-            $validated['image'] = $imageName;
-        }
-       */
-        $validated['password'] = Hash::make($validated['password']);
+    $validated['password'] = Hash::make($validated['password']);
 
-        
+    $customer = customers::create($validated);
 
-        $customer = customers::create($validated);
+    $token = $customer->createToken('CustomerToken')->plainTextToken;
 
-        $token = $customer->createToken('CustomerToken')->plainTextToken; # token
-
-        return response()->json([
-            'message' => 'Customer registered successfully',
-            'customer' => $customer,
-            'token' => $token,
-        ], 201);
-    }
+    return response()->json([
+        'message' => 'Customer registered successfully',
+        'customer' => $customer,
+        'token' => $token,
+    ], 201);
+}
 
     public function customer_signin(Request $request)
     {
